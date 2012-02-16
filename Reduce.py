@@ -1,37 +1,29 @@
 import sys
 from operator import itemgetter
+from itertools import groupby
 
-current_word = None
-current_count = 0
-word = None
+def read_map_output(file, seperator ='\t'):
+    for line in file:
+        yield line.rstrip().split(seperator, 1)
 
-for line in sys.stdin:
+def main(seperator = '\t'):
+    #input comes form stdin
 
-    line = line.strip()
-    #remove white space
+    data = read_map_output(sys.stdin, seperator = seperator)
 
-    word, count = line.split('\t', 1)
-    #parse input from map.py
+    #groupby groups multiple word-count pairs by word,
+    #and creates an interator that returns consecutive keys and their group:
+        # current_word - string containing a word (the key)
+        # group - interator yielding all ["<current_word>", "<count>"] items
 
-    try:
-        count = int(count)
-        #convert count from string to int
-    except ValueError:
-        countinue
-        # count was not a number so ignore this line
+    for current_word, group in groupby(data, itemgetter(0)):
+        try:
+            total_count = sum(int(count) for current_word, count in group)
+            print "%s%s%d" % (current_word, seperator, total_count)
 
-    if current_word == word:
-        current_count += count
-
-    else:
-        if current_word:
-            print current_word, current_count
-            #write result to STDOUT
-
-        current_count = count
-        current_word = word
-
-if current_word == word:
-    print current_word, current_count
-#don't foreget to output last word if needed
+        except ValueError:
+                #count was not a number, silently discard
+            pass
+if __name__ == "__main()":
+    main()
 
